@@ -6,7 +6,7 @@
 ![Roblox](https://img.shields.io/badge/platform-Roblox-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-**A modern, minimalist UI library for Roblox exploits**
+**A modern, minimalist UI library for Roblox**
 
 [Installation](#-installation) •
 [Quick Start](#-quick-start) •
