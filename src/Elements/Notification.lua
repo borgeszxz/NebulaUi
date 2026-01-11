@@ -94,7 +94,7 @@ return function(Nebula, Theme, Utils, ScreenGui)
             Parent = NotifFrame,
             BackgroundTransparency = 1,
             Size = fromOffset(20, 20),
-            Position = fromOffset(14, 12),
+            Position = fromOffset(22, 12),
             Image = Nebula:GetIcon(icon),
             ImageColor3 = typeData.Color,
         })
@@ -102,8 +102,8 @@ return function(Nebula, Theme, Utils, ScreenGui)
         Utils:Create("TextLabel", {
             Parent = NotifFrame,
             BackgroundTransparency = 1,
-            Size = udim2(1, -50, 0, 18),
-            Position = fromOffset(42, 10),
+            Size = udim2(1, -60, 0, 18),
+            Position = fromOffset(50, 10),
             Font = Enum.Font.GothamBold,
             Text = title,
             TextColor3 = Theme.TextPrimary,
@@ -114,8 +114,8 @@ return function(Nebula, Theme, Utils, ScreenGui)
         Utils:Create("TextLabel", {
             Parent = NotifFrame,
             BackgroundTransparency = 1,
-            Size = udim2(1, -50, 0, 16),
-            Position = fromOffset(42, 30),
+            Size = udim2(1, -60, 0, 16),
+            Position = fromOffset(50, 30),
             Font = Enum.Font.Gotham,
             Text = message,
             TextColor3 = Theme.TextSecondary,
