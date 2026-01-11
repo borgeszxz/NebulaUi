@@ -80,9 +80,14 @@ return function(Nebula, Theme, Utils, ScreenGui)
         local AccentBar = Utils:Create("Frame", {
             Parent = NotifFrame,
             BackgroundColor3 = typeData.Color,
-            Size = udim2(0, 3, 1, 0),
-            Position = udim2(0, 0, 0, 0),
+            Size = udim2(0, 4, 1, -16),
+            Position = udim2(0, 8, 0, 8),
             BorderSizePixel = 0,
+        })
+        
+        Utils:Create("UICorner", {
+            Parent = AccentBar,
+            CornerRadius = udim(0, 2),
         })
         
         local IconLabel = Utils:Create("ImageLabel", {
