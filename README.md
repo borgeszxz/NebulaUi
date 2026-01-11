@@ -17,6 +17,16 @@
 
 ---
 
+## 📸 Preview
+
+<div align="center">
+
+![Nebula UI Preview](https://media.discordapp.net/attachments/1097281959538991235/1459925010796908575/image.png?ex=69650c9e&is=6963bb1e&hm=ed89ef8807a3b86bf1cc2417425e27f3ffb57861875ea56eb1743794175d0c45&=&format=webp&quality=lossless)
+
+</div>
+
+---
+
 ## ✨ Features
 
 - 🎨 **Minimalist Design**
