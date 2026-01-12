@@ -34,6 +34,7 @@ local NotificationModule = LoadModule("Elements/Notification.lua")
 local ColorPickerElement = LoadModule("Elements/ColorPicker.lua")
 local MultiDropdownElement = LoadModule("Elements/MultiDropdown.lua")
 local DialogModule = LoadModule("Components/Dialog.lua")
+local TooltipModule = LoadModule("Components/Tooltip.lua")
 
 local rgb = Color3.fromRGB
 local udim2 = UDim2.new
@@ -158,6 +159,11 @@ function Nebula:CreateWindow(options)
     
     if not Nebula.DialogSystem then
         Nebula.DialogSystem = DialogModule(Nebula, Theme, Utils, ScreenGui)
+    end
+    
+    if not Nebula.Tooltip then
+        Nebula.Tooltip = TooltipModule(Nebula, Theme, Utils, ScreenGui)
+        Nebula.Tooltip:Init()
     end
     
     local MainFrame = Utils:Create("Frame", {
@@ -407,6 +413,70 @@ function Nebula:CreateWindow(options)
     })
     
     Utils:Draggify(MainFrame, TopBar)
+    
+    local minWidth, minHeight = 500, 400
+    local resizing = false
+    local resizeDir = nil
+    
+    local function CreateResizeHandle(name, size, position, cursor)
+        local handle = Utils:Create("TextButton", {
+            Name = "Resize_" .. name,
+            Parent = MainFrame,
+            BackgroundTransparency = 1,
+            Size = size,
+            Position = position,
+            Text = "",
+            AutoButtonColor = false,
+            ZIndex = 10,
+        })
+        
+        handle.MouseEnter:Connect(function()
+        end)
+        
+        handle.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                resizing = true
+                resizeDir = name
+            end
+        end)
+        
+        handle.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                resizing = false
+                resizeDir = nil
+            end
+        end)
+        
+        return handle
+    end
+    
+    CreateResizeHandle("Right", udim2(0, 8, 1, -40), udim2(1, -4, 0, 32), "SizeWE")
+    CreateResizeHandle("Bottom", udim2(1, -8, 0, 8), udim2(0, 4, 1, -4), "SizeNS")
+    CreateResizeHandle("Corner", fromOffset(16, 16), udim2(1, -12, 1, -12), "SizeNWSE")
+    
+    Utils:AddConnection(UserInputService.InputChanged, function(input)
+        if resizing and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local mouse = UserInputService:GetMouseLocation()
+            local framePos = MainFrame.AbsolutePosition
+            
+            if resizeDir == "Right" or resizeDir == "Corner" then
+                local newWidth = math.max(mouse.X - framePos.X, minWidth)
+                MainFrame.Size = fromOffset(newWidth, MainFrame.Size.Y.Offset)
+            end
+            
+            if resizeDir == "Bottom" or resizeDir == "Corner" then
+                local newHeight = math.max(mouse.Y - framePos.Y - 36, minHeight)
+                MainFrame.Size = fromOffset(MainFrame.Size.X.Offset, newHeight)
+            end
+        end
+    end)
+    
+    Utils:AddConnection(UserInputService.InputEnded, function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            resizing = false
+            resizeDir = nil
+        end
+    end)
     
     Utils:AddConnection(UserInputService.InputBegan, function(input, gameProcessed)
         if gameProcessed then return end

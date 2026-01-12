@@ -24,6 +24,8 @@ local AimbotSection = CombatTab:NewSection({
 
 AimbotSection:Toggle({
     Name = "Enable Aimbot",
+    Description = "Automatically aims at the nearest target within your FOV",
+    DescriptionDuration = 3,
     Default = false,
     Flag = "AimbotEnabled",
     Callback = function(value)
@@ -33,6 +35,7 @@ AimbotSection:Toggle({
 
 AimbotSection:Slider({
     Name = "FOV",
+    Description = "The field of view radius for target detection (in pixels)",
     Min = 10,
     Max = 500,
     Default = 120,
@@ -45,6 +48,7 @@ AimbotSection:Slider({
 
 AimbotSection:Dropdown({
     Name = "Target Part",
+    Description = "Select which body part to aim at",
     Options = {"Head", "Torso", "HumanoidRootPart"},
     Default = "Head",
     Flag = "AimbotTargetPart",
@@ -55,6 +59,7 @@ AimbotSection:Dropdown({
 
 AimbotSection:Keybind({
     Name = "Aim Key",
+    Description = "Press this key to activate aimbot. Hold mode keeps it active while held",
     Default = Enum.KeyCode.Q,
     Mode = "Hold",
     Flag = "AimbotKey",

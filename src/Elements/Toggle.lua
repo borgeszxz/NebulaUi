@@ -3,6 +3,8 @@ return function(Nebula, Theme, Utils, Section, options)
     
     local toggleData = {
         Name = options.Name or "Toggle",
+        Description = options.Description,
+        DescriptionDuration = options.DescriptionDuration,
         Default = options.Default or false,
         Flag = options.Flag or options.Name or "Toggle",
         Callback = options.Callback or function() end,
@@ -35,6 +37,42 @@ return function(Nebula, Theme, Utils, Section, options)
         TextSize = 14,
         TextXAlignment = Enum.TextXAlignment.Left,
     })
+    
+    if toggleData.Description and Nebula.Tooltip then
+        local InfoBtn = Utils:Create("TextButton", {
+            Parent = ToggleFrame,
+            BackgroundColor3 = Theme.ElementBackground,
+            Size = fromOffset(16, 16),
+            Position = udim2(0, ToggleName.TextBounds.X + 6, 0.5, 0),
+            AnchorPoint = vec2(0, 0.5),
+            AutoButtonColor = false,
+            Text = "?",
+            Font = Enum.Font.GothamBold,
+            TextColor3 = Theme.TextMuted,
+            TextSize = 11,
+        })
+        
+        Utils:Create("UICorner", {
+            Parent = InfoBtn,
+            CornerRadius = udim(1, 0),
+        })
+        
+        ToggleName:GetPropertyChangedSignal("TextBounds"):Connect(function()
+            InfoBtn.Position = udim2(0, ToggleName.TextBounds.X + 6, 0.5, 0)
+        end)
+        
+        InfoBtn.MouseEnter:Connect(function()
+            Utils:Tween(InfoBtn, {BackgroundColor3 = Theme.Accent, TextColor3 = Theme.TextPrimary}, 0.15)
+        end)
+        
+        InfoBtn.MouseLeave:Connect(function()
+            Utils:Tween(InfoBtn, {BackgroundColor3 = Theme.ElementBackground, TextColor3 = Theme.TextMuted}, 0.15)
+        end)
+        
+        InfoBtn.MouseButton1Click:Connect(function()
+            Nebula.Tooltip:Toggle(toggleData.Description, toggleData.Name, InfoBtn, toggleData.DescriptionDuration)
+        end)
+    end
     
     local ToggleButton = Utils:Create("TextButton", {
         Name = "ToggleButton",

@@ -3,19 +3,30 @@ return function(Nebula, Theme, Utils, Section, options)
     
     local buttonData = {
         Name = options.Name or "Button",
+        Description = options.Description,
+        DescriptionDuration = options.DescriptionDuration,
         Callback = options.Callback or function() end,
     }
     
     local rgb = Color3.fromRGB
     local udim2 = UDim2.new
     local udim = UDim.new
+    local fromOffset = UDim2.fromOffset
+    local vec2 = Vector2.new
+    
+    local ButtonContainer = Utils:Create("Frame", {
+        Name = "ButtonContainer_" .. buttonData.Name,
+        Parent = Section.ElementsContainer,
+        BackgroundTransparency = 1,
+        Size = udim2(1, 0, 0, 32),
+    })
     
     local ButtonFrame = Utils:Create("TextButton", {
-        Name = "Button_" .. buttonData.Name,
-        Parent = Section.ElementsContainer,
+        Name = "Button",
+        Parent = ButtonContainer,
         BackgroundColor3 = Theme.ElementBackground,
         BackgroundTransparency = 0.3,
-        Size = udim2(1, 0, 0, 32),
+        Size = buttonData.Description and udim2(1, -26, 1, 0) or udim2(1, 0, 1, 0),
         AutoButtonColor = false,
         Text = "",
     })
@@ -41,6 +52,38 @@ return function(Nebula, Theme, Utils, Section, options)
         TextColor3 = Theme.TextSecondary,
         TextSize = 14,
     })
+    
+    if buttonData.Description and Nebula.Tooltip then
+        local InfoBtn = Utils:Create("TextButton", {
+            Parent = ButtonContainer,
+            BackgroundColor3 = Theme.ElementBackground,
+            Size = fromOffset(20, 20),
+            Position = udim2(1, -20, 0.5, 0),
+            AnchorPoint = vec2(0, 0.5),
+            AutoButtonColor = false,
+            Text = "?",
+            Font = Enum.Font.GothamBold,
+            TextColor3 = Theme.TextMuted,
+            TextSize = 11,
+        })
+        
+        Utils:Create("UICorner", {
+            Parent = InfoBtn,
+            CornerRadius = udim(1, 0),
+        })
+        
+        InfoBtn.MouseEnter:Connect(function()
+            Utils:Tween(InfoBtn, {BackgroundColor3 = Theme.Accent, TextColor3 = Theme.TextPrimary}, 0.15)
+        end)
+        
+        InfoBtn.MouseLeave:Connect(function()
+            Utils:Tween(InfoBtn, {BackgroundColor3 = Theme.ElementBackground, TextColor3 = Theme.TextMuted}, 0.15)
+        end)
+        
+        InfoBtn.MouseButton1Click:Connect(function()
+            Nebula.Tooltip:Toggle(buttonData.Description, buttonData.Name, InfoBtn, buttonData.DescriptionDuration)
+        end)
+    end
     
     ButtonFrame.MouseEnter:Connect(function()
         Utils:Tween(ButtonFrame, {BackgroundTransparency = 0.1})

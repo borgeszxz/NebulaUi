@@ -3,6 +3,8 @@ return function(Nebula, Theme, Utils, Section, options)
     
     local textboxData = {
         Name = options.Name or "TextBox",
+        Description = options.Description,
+        DescriptionDuration = options.DescriptionDuration,
         Default = options.Default or "",
         Placeholder = options.Placeholder or "Enter text...",
         Flag = options.Flag or options.Name or "TextBox",
@@ -15,6 +17,8 @@ return function(Nebula, Theme, Utils, Section, options)
     local rgb = Color3.fromRGB
     local udim2 = UDim2.new
     local udim = UDim.new
+    local fromOffset = UDim2.fromOffset
+    local vec2 = Vector2.new
     
     local TextBoxFrame = Utils:Create("Frame", {
         Name = "TextBox_" .. textboxData.Name,
@@ -33,6 +37,41 @@ return function(Nebula, Theme, Utils, Section, options)
         TextSize = 14,
         TextXAlignment = Enum.TextXAlignment.Left,
     })
+    
+    if textboxData.Description and Nebula.Tooltip then
+        local InfoBtn = Utils:Create("TextButton", {
+            Parent = TextBoxFrame,
+            BackgroundColor3 = Theme.ElementBackground,
+            Size = fromOffset(16, 16),
+            Position = udim2(0, TextBoxName.TextBounds.X + 6, 0, 2),
+            AutoButtonColor = false,
+            Text = "?",
+            Font = Enum.Font.GothamBold,
+            TextColor3 = Theme.TextMuted,
+            TextSize = 11,
+        })
+        
+        Utils:Create("UICorner", {
+            Parent = InfoBtn,
+            CornerRadius = udim(1, 0),
+        })
+        
+        TextBoxName:GetPropertyChangedSignal("TextBounds"):Connect(function()
+            InfoBtn.Position = udim2(0, TextBoxName.TextBounds.X + 6, 0, 2)
+        end)
+        
+        InfoBtn.MouseEnter:Connect(function()
+            Utils:Tween(InfoBtn, {BackgroundColor3 = Theme.Accent, TextColor3 = Theme.TextPrimary}, 0.15)
+        end)
+        
+        InfoBtn.MouseLeave:Connect(function()
+            Utils:Tween(InfoBtn, {BackgroundColor3 = Theme.ElementBackground, TextColor3 = Theme.TextMuted}, 0.15)
+        end)
+        
+        InfoBtn.MouseButton1Click:Connect(function()
+            Nebula.Tooltip:Toggle(textboxData.Description, textboxData.Name, InfoBtn, textboxData.DescriptionDuration)
+        end)
+    end
     
     local TextBoxInput = Utils:Create("TextBox", {
         Name = "Input",

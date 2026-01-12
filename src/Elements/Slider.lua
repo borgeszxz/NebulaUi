@@ -3,6 +3,8 @@ return function(Nebula, Theme, Utils, Section, options)
     
     local sliderData = {
         Name = options.Name or "Slider",
+        Description = options.Description,
+        DescriptionDuration = options.DescriptionDuration,
         Min = options.Min or 0,
         Max = options.Max or 100,
         Default = options.Default or 50,
@@ -41,6 +43,41 @@ return function(Nebula, Theme, Utils, Section, options)
         TextSize = 14,
         TextXAlignment = Enum.TextXAlignment.Left,
     })
+    
+    if sliderData.Description and Nebula.Tooltip then
+        local InfoBtn = Utils:Create("TextButton", {
+            Parent = SliderFrame,
+            BackgroundColor3 = Theme.ElementBackground,
+            Size = fromOffset(16, 16),
+            Position = udim2(0, SliderName.TextBounds.X + 6, 0, 2),
+            AutoButtonColor = false,
+            Text = "?",
+            Font = Enum.Font.GothamBold,
+            TextColor3 = Theme.TextMuted,
+            TextSize = 11,
+        })
+        
+        Utils:Create("UICorner", {
+            Parent = InfoBtn,
+            CornerRadius = udim(1, 0),
+        })
+        
+        SliderName:GetPropertyChangedSignal("TextBounds"):Connect(function()
+            InfoBtn.Position = udim2(0, SliderName.TextBounds.X + 6, 0, 2)
+        end)
+        
+        InfoBtn.MouseEnter:Connect(function()
+            Utils:Tween(InfoBtn, {BackgroundColor3 = Theme.Accent, TextColor3 = Theme.TextPrimary}, 0.15)
+        end)
+        
+        InfoBtn.MouseLeave:Connect(function()
+            Utils:Tween(InfoBtn, {BackgroundColor3 = Theme.ElementBackground, TextColor3 = Theme.TextMuted}, 0.15)
+        end)
+        
+        InfoBtn.MouseButton1Click:Connect(function()
+            Nebula.Tooltip:Toggle(sliderData.Description, sliderData.Name, InfoBtn, sliderData.DescriptionDuration)
+        end)
+    end
     
     local SliderValue = Utils:Create("TextLabel", {
         Parent = SliderFrame,

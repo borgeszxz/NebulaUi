@@ -13,6 +13,8 @@ return function(Nebula, Theme, Utils, Section, options)
     
     local keybindData = {
         Name = options.Name or "Keybind",
+        Description = options.Description,
+        DescriptionDuration = options.DescriptionDuration,
         Default = defaultKey,
         Flag = options.Flag or options.Name or "Keybind",
         Callback = options.Callback or function() end,
@@ -51,6 +53,42 @@ return function(Nebula, Theme, Utils, Section, options)
         TextSize = 14,
         TextXAlignment = Enum.TextXAlignment.Left,
     })
+    
+    if keybindData.Description and Nebula.Tooltip then
+        local InfoBtn = Utils:Create("TextButton", {
+            Parent = KeybindFrame,
+            BackgroundColor3 = Theme.ElementBackground,
+            Size = fromOffset(16, 16),
+            Position = udim2(0, KeybindName.TextBounds.X + 6, 0.5, 0),
+            AnchorPoint = vec2(0, 0.5),
+            AutoButtonColor = false,
+            Text = "?",
+            Font = Enum.Font.GothamBold,
+            TextColor3 = Theme.TextMuted,
+            TextSize = 11,
+        })
+        
+        Utils:Create("UICorner", {
+            Parent = InfoBtn,
+            CornerRadius = udim(1, 0),
+        })
+        
+        KeybindName:GetPropertyChangedSignal("TextBounds"):Connect(function()
+            InfoBtn.Position = udim2(0, KeybindName.TextBounds.X + 6, 0.5, 0)
+        end)
+        
+        InfoBtn.MouseEnter:Connect(function()
+            Utils:Tween(InfoBtn, {BackgroundColor3 = Theme.Accent, TextColor3 = Theme.TextPrimary}, 0.15)
+        end)
+        
+        InfoBtn.MouseLeave:Connect(function()
+            Utils:Tween(InfoBtn, {BackgroundColor3 = Theme.ElementBackground, TextColor3 = Theme.TextMuted}, 0.15)
+        end)
+        
+        InfoBtn.MouseButton1Click:Connect(function()
+            Nebula.Tooltip:Toggle(keybindData.Description, keybindData.Name, InfoBtn, keybindData.DescriptionDuration)
+        end)
+    end
     
     local ModeButton = nil
     local ModeIcon = nil

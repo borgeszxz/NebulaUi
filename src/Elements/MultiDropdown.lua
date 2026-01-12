@@ -3,6 +3,8 @@ return function(Nebula, Theme, Utils, Section, options)
     
     local multiDropdownData = {
         Name = options.Name or "Multi Dropdown",
+        Description = options.Description,
+        DescriptionDuration = options.DescriptionDuration,
         Options = options.Options or {},
         Default = options.Default or {},
         Flag = options.Flag or options.Name or "MultiDropdown",
@@ -49,6 +51,41 @@ return function(Nebula, Theme, Utils, Section, options)
         TextSize = 14,
         TextXAlignment = Enum.TextXAlignment.Left,
     })
+    
+    if multiDropdownData.Description and Nebula.Tooltip then
+        local InfoBtn = Utils:Create("TextButton", {
+            Parent = MultiDropdownFrame,
+            BackgroundColor3 = Theme.ElementBackground,
+            Size = fromOffset(16, 16),
+            Position = udim2(0, MultiDropdownName.TextBounds.X + 6, 0, 2),
+            AutoButtonColor = false,
+            Text = "?",
+            Font = Enum.Font.GothamBold,
+            TextColor3 = Theme.TextMuted,
+            TextSize = 11,
+        })
+        
+        Utils:Create("UICorner", {
+            Parent = InfoBtn,
+            CornerRadius = udim(1, 0),
+        })
+        
+        MultiDropdownName:GetPropertyChangedSignal("TextBounds"):Connect(function()
+            InfoBtn.Position = udim2(0, MultiDropdownName.TextBounds.X + 6, 0, 2)
+        end)
+        
+        InfoBtn.MouseEnter:Connect(function()
+            Utils:Tween(InfoBtn, {BackgroundColor3 = Theme.Accent, TextColor3 = Theme.TextPrimary}, 0.15)
+        end)
+        
+        InfoBtn.MouseLeave:Connect(function()
+            Utils:Tween(InfoBtn, {BackgroundColor3 = Theme.ElementBackground, TextColor3 = Theme.TextMuted}, 0.15)
+        end)
+        
+        InfoBtn.MouseButton1Click:Connect(function()
+            Nebula.Tooltip:Toggle(multiDropdownData.Description, multiDropdownData.Name, InfoBtn, multiDropdownData.DescriptionDuration)
+        end)
+    end
     
     local MultiDropdownButton = Utils:Create("TextButton", {
         Name = "Button",

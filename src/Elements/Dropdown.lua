@@ -3,6 +3,8 @@ return function(Nebula, Theme, Utils, Section, options)
     
     local dropdownData = {
         Name = options.Name or "Dropdown",
+        Description = options.Description,
+        DescriptionDuration = options.DescriptionDuration,
         Options = options.Options or {},
         Default = options.Default,
         Flag = options.Flag or options.Name or "Dropdown",
@@ -37,6 +39,41 @@ return function(Nebula, Theme, Utils, Section, options)
         TextSize = 14,
         TextXAlignment = Enum.TextXAlignment.Left,
     })
+    
+    if dropdownData.Description and Nebula.Tooltip then
+        local InfoBtn = Utils:Create("TextButton", {
+            Parent = DropdownFrame,
+            BackgroundColor3 = Theme.ElementBackground,
+            Size = fromOffset(16, 16),
+            Position = udim2(0, DropdownName.TextBounds.X + 6, 0, 2),
+            AutoButtonColor = false,
+            Text = "?",
+            Font = Enum.Font.GothamBold,
+            TextColor3 = Theme.TextMuted,
+            TextSize = 11,
+        })
+        
+        Utils:Create("UICorner", {
+            Parent = InfoBtn,
+            CornerRadius = udim(1, 0),
+        })
+        
+        DropdownName:GetPropertyChangedSignal("TextBounds"):Connect(function()
+            InfoBtn.Position = udim2(0, DropdownName.TextBounds.X + 6, 0, 2)
+        end)
+        
+        InfoBtn.MouseEnter:Connect(function()
+            Utils:Tween(InfoBtn, {BackgroundColor3 = Theme.Accent, TextColor3 = Theme.TextPrimary}, 0.15)
+        end)
+        
+        InfoBtn.MouseLeave:Connect(function()
+            Utils:Tween(InfoBtn, {BackgroundColor3 = Theme.ElementBackground, TextColor3 = Theme.TextMuted}, 0.15)
+        end)
+        
+        InfoBtn.MouseButton1Click:Connect(function()
+            Nebula.Tooltip:Toggle(dropdownData.Description, dropdownData.Name, InfoBtn, dropdownData.DescriptionDuration)
+        end)
+    end
     
     local DropdownButton = Utils:Create("TextButton", {
         Name = "Button",
