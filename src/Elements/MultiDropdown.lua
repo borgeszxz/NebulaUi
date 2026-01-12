@@ -21,13 +21,13 @@ return function(Nebula, Theme, Utils, Section, options)
     
     local function GetDisplayText()
         if #multiDropdownData.Value == 0 then
-            return "None selected"
-        elseif #multiDropdownData.Value == 1 then
-            return multiDropdownData.Value[1]
-        elseif #multiDropdownData.Value == #multiDropdownData.Options then
-            return "All selected"
+            return "None"
         else
-            return #multiDropdownData.Value .. " selected"
+            local text = table.concat(multiDropdownData.Value, ", ")
+            if #text > 25 then
+                text = string.sub(text, 1, 22) .. "..."
+            end
+            return text
         end
     end
     
