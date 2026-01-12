@@ -73,23 +73,21 @@ return function(Nebula, Theme, Utils, Section, options)
         TextXAlignment = Enum.TextXAlignment.Left,
     })
     
-    local DropdownArrow = Utils:Create("TextLabel", {
+    local DropdownArrow = Utils:Create("ImageLabel", {
         Parent = DropdownButton,
         BackgroundTransparency = 1,
-        Size = fromOffset(20, 20),
-        Position = udim2(1, -25, 0.5, 0),
+        Size = fromOffset(16, 16),
+        Position = udim2(1, -24, 0.5, 0),
         AnchorPoint = vec2(0, 0.5),
-        Font = Enum.Font.GothamBold,
-        Text = "▼",
-        TextColor3 = Theme.TextMuted,
-        TextSize = 10,
+        Image = Nebula:GetIcon("chevron-down"),
+        ImageColor3 = Theme.TextMuted,
     })
     
     local OptionsContainer = Utils:Create("Frame", {
         Name = "Options",
         Parent = DropdownFrame,
-        BackgroundColor3 = Theme.ContainerBackground,
-        BackgroundTransparency = 0.2,
+        BackgroundColor3 = rgb(22, 22, 26),
+        BackgroundTransparency = 0,
         Size = udim2(1, 0, 0, 0),
         Position = udim2(0, 0, 0, 52),
         ClipsDescendants = true,
@@ -99,7 +97,7 @@ return function(Nebula, Theme, Utils, Section, options)
     
     Utils:Create("UICorner", {
         Parent = OptionsContainer,
-        CornerRadius = Theme.CornerRadiusTiny,
+        CornerRadius = udim(0, 6),
     })
     
     Utils:Create("UIStroke", {
@@ -131,12 +129,14 @@ return function(Nebula, Theme, Utils, Section, options)
         end
         
         for i, option in ipairs(dropdownData.Options) do
+            local isSelected = option == dropdownData.Value
+            
             local OptionButton = Utils:Create("TextButton", {
                 Name = "Option_" .. option,
                 Parent = OptionsContainer,
-                BackgroundColor3 = Theme.ElementBackground,
-                BackgroundTransparency = 0.5,
-                Size = udim2(1, 0, 0, 24),
+                BackgroundColor3 = isSelected and Theme.Accent or Theme.ElementBackground,
+                BackgroundTransparency = isSelected and 0.7 or 0.5,
+                Size = udim2(1, 0, 0, 26),
                 AutoButtonColor = false,
                 Text = "",
                 LayoutOrder = i,
@@ -153,22 +153,26 @@ return function(Nebula, Theme, Utils, Section, options)
                 BackgroundTransparency = 1,
                 Size = udim2(1, -10, 1, 0),
                 Position = udim2(0, 8, 0, 0),
-                Font = Enum.Font.Gotham,
+                Font = Enum.Font.GothamMedium,
                 Text = option,
-                TextColor3 = Theme.TextSecondary,
+                TextColor3 = isSelected and Theme.TextPrimary or Theme.TextSecondary,
                 TextSize = 13,
                 TextXAlignment = Enum.TextXAlignment.Left,
                 ZIndex = 12,
             })
             
             OptionButton.MouseEnter:Connect(function()
-                Utils:Tween(OptionButton, {BackgroundTransparency = 0.2})
-                Utils:Tween(OptionLabel, {TextColor3 = Theme.Accent})
+                if option ~= dropdownData.Value then
+                    Utils:Tween(OptionButton, {BackgroundTransparency = 0.3})
+                    Utils:Tween(OptionLabel, {TextColor3 = Theme.TextPrimary})
+                end
             end)
             
             OptionButton.MouseLeave:Connect(function()
-                Utils:Tween(OptionButton, {BackgroundTransparency = 0.5})
-                Utils:Tween(OptionLabel, {TextColor3 = Theme.TextSecondary})
+                if option ~= dropdownData.Value then
+                    Utils:Tween(OptionButton, {BackgroundTransparency = 0.5})
+                    Utils:Tween(OptionLabel, {TextColor3 = Theme.TextSecondary})
+                end
             end)
             
             OptionButton.MouseButton1Click:Connect(function()
@@ -180,6 +184,7 @@ return function(Nebula, Theme, Utils, Section, options)
                 dropdownData.Open = false
                 Utils:Tween(OptionsContainer, {Size = udim2(1, 0, 0, 0)}, 0.2)
                 Utils:Tween(DropdownArrow, {Rotation = 0})
+                Utils:Tween(DropdownButton.UIStroke, {Color = Theme.StrokeColorLight}, 0.15)
                 task.wait(0.2)
                 OptionsContainer.Visible = false
                 DropdownFrame.Size = udim2(1, 0, 0, 50)
@@ -191,20 +196,33 @@ return function(Nebula, Theme, Utils, Section, options)
     
     RefreshOptions()
     
+    DropdownButton.MouseEnter:Connect(function()
+        Utils:Tween(DropdownButton, {BackgroundTransparency = 0.1})
+    end)
+    
+    DropdownButton.MouseLeave:Connect(function()
+        if not dropdownData.Open then
+            Utils:Tween(DropdownButton, {BackgroundTransparency = 0.3})
+        end
+    end)
+    
     DropdownButton.MouseButton1Click:Connect(function()
         dropdownData.Open = not dropdownData.Open
         
         if dropdownData.Open then
             local optionCount = #dropdownData.Options
-            local containerHeight = (optionCount * 26) + 8
+            local containerHeight = (optionCount * 28) + 8
             
             OptionsContainer.Visible = true
             DropdownFrame.Size = udim2(1, 0, 0, 52 + containerHeight)
             Utils:Tween(OptionsContainer, {Size = udim2(1, 0, 0, containerHeight)}, 0.2)
             Utils:Tween(DropdownArrow, {Rotation = 180})
+            Utils:Tween(DropdownButton.UIStroke, {Color = Theme.Accent}, 0.15)
+            RefreshOptions()
         else
             Utils:Tween(OptionsContainer, {Size = udim2(1, 0, 0, 0)}, 0.2)
             Utils:Tween(DropdownArrow, {Rotation = 0})
+            Utils:Tween(DropdownButton.UIStroke, {Color = Theme.StrokeColorLight}, 0.15)
             task.wait(0.2)
             OptionsContainer.Visible = false
             DropdownFrame.Size = udim2(1, 0, 0, 50)
@@ -217,6 +235,7 @@ return function(Nebula, Theme, Utils, Section, options)
             Nebula.Flags[dropdownData.Flag] = value
             SelectedLabel.Text = value
             SelectedLabel.TextColor3 = Theme.TextPrimary
+            RefreshOptions()
         end
     end
     

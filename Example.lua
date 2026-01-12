@@ -56,9 +56,10 @@ AimbotSection:Dropdown({
 AimbotSection:Keybind({
     Name = "Aim Key",
     Default = Enum.KeyCode.Q,
+    Mode = "Hold",
     Flag = "AimbotKey",
-    Callback = function(key)
-        print("Aim key pressed:", key)
+    Callback = function(key, active)
+        print("Aim key:", key, "Active:", active)
     end,
 })
 
