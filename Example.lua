@@ -309,6 +309,33 @@ UISection:Button({
     end,
 })
 
+UISection:Button({
+    Name = "Test Dialog",
+    Callback = function()
+        Nebula:Confirm({
+            Title = "Confirm Action",
+            Content = "Are you sure you want to do this? This action cannot be undone.",
+            ConfirmText = "Yes",
+            OnConfirm = function()
+                Nebula:Notify({
+                    Title = "Confirmed!",
+                    Message = "Action was confirmed",
+                    Type = "Success",
+                    Duration = 2,
+                })
+            end,
+            OnCancel = function()
+                Nebula:Notify({
+                    Title = "Cancelled",
+                    Message = "Action was cancelled",
+                    Type = "Warning",
+                    Duration = 2,
+                })
+            end,
+        })
+    end,
+})
+
 local InfoSection = SettingsTab:NewSection({
     Name = "Information",
     Side = "Right",

@@ -33,6 +33,7 @@ local TextBoxElement = LoadModule("Elements/TextBox.lua")
 local NotificationModule = LoadModule("Elements/Notification.lua")
 local ColorPickerElement = LoadModule("Elements/ColorPicker.lua")
 local MultiDropdownElement = LoadModule("Elements/MultiDropdown.lua")
+local DialogModule = LoadModule("Components/Dialog.lua")
 
 local rgb = Color3.fromRGB
 local udim2 = UDim2.new
@@ -62,6 +63,24 @@ end
 function Nebula:Notify(options)
     if Nebula.Notifications then
         return Nebula.Notifications:Send(options)
+    end
+end
+
+function Nebula:Dialog(options)
+    if Nebula.DialogSystem then
+        return Nebula.DialogSystem:Create(options)
+    end
+end
+
+function Nebula:Confirm(options)
+    if Nebula.DialogSystem then
+        return Nebula.DialogSystem:Confirm(options)
+    end
+end
+
+function Nebula:Alert(options)
+    if Nebula.DialogSystem then
+        return Nebula.DialogSystem:Alert(options)
     end
 end
 
@@ -135,6 +154,10 @@ function Nebula:CreateWindow(options)
     if not Nebula.Notifications then
         Nebula.Notifications = NotificationModule(Nebula, Theme, Utils, ScreenGui)
         Nebula.Notifications:Init(ScreenGui)
+    end
+    
+    if not Nebula.DialogSystem then
+        Nebula.DialogSystem = DialogModule(Nebula, Theme, Utils, ScreenGui)
     end
     
     local MainFrame = Utils:Create("Frame", {
