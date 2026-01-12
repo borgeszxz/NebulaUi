@@ -31,7 +31,6 @@ local KeybindElement = LoadModule("Elements/Keybind.lua")
 local DropdownElement = LoadModule("Elements/Dropdown.lua")
 local TextBoxElement = LoadModule("Elements/TextBox.lua")
 local NotificationModule = LoadModule("Elements/Notification.lua")
-local WatermarkModule = LoadModule("Elements/Watermark.lua")
 
 local rgb = Color3.fromRGB
 local udim2 = UDim2.new
@@ -61,30 +60,6 @@ end
 function Nebula:Notify(options)
     if Nebula.Notifications then
         return Nebula.Notifications:Send(options)
-    end
-end
-
-function Nebula:Watermark(options)
-    if Nebula.WatermarkInstance then
-        Nebula.WatermarkInstance:Destroy()
-    end
-    
-    local window = Nebula.Windows[1]
-    if window and window.ScreenGui then
-        Nebula.WatermarkInstance = WatermarkModule(Nebula, Theme, Utils, window.ScreenGui)
-        return Nebula.WatermarkInstance:Create(options)
-    end
-end
-
-function Nebula:HideWatermark()
-    if Nebula.WatermarkInstance then
-        Nebula.WatermarkInstance:SetVisible(false)
-    end
-end
-
-function Nebula:ShowWatermark()
-    if Nebula.WatermarkInstance then
-        Nebula.WatermarkInstance:SetVisible(true)
     end
 end
 
@@ -166,6 +141,7 @@ function Nebula:CreateWindow(options)
         Size = windowData.Size,
         Position = fromScale(0.5, 0.5),
         AnchorPoint = vec2(0.5, 0.5),
+        ClipsDescendants = true,
     })
     MainFrame.Position = fromOffset(MainFrame.AbsolutePosition.X, MainFrame.AbsolutePosition.Y)
     MainFrame.AnchorPoint = vec2(0, 0)

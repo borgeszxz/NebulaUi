@@ -306,15 +306,6 @@ InfoSection:Label({
     Text = "developed by @borgeszxz",
 })
 
-Nebula:Watermark({
-    Title = "Nebula UI",
-    ShowFPS = true,
-    ShowPing = true,
-    ShowTime = true,
-    ShowUser = false,
-    Position = "TopRight", -- TopLeft, TopRight, BottomLeft, BottomRight
-})
-
 print("Nebula UI V1 Loaded!")
 print("Press LeftControl to toggle")
 
