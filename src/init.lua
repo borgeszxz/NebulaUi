@@ -31,6 +31,7 @@ local KeybindElement = LoadModule("Elements/Keybind.lua")
 local DropdownElement = LoadModule("Elements/Dropdown.lua")
 local TextBoxElement = LoadModule("Elements/TextBox.lua")
 local NotificationModule = LoadModule("Elements/Notification.lua")
+local WatermarkModule = LoadModule("Elements/Watermark.lua")
 
 local rgb = Color3.fromRGB
 local udim2 = UDim2.new
@@ -60,6 +61,69 @@ end
 function Nebula:Notify(options)
     if Nebula.Notifications then
         return Nebula.Notifications:Send(options)
+    end
+end
+
+function Nebula:Watermark(options)
+    if Nebula.WatermarkInstance then
+        Nebula.WatermarkInstance:Destroy()
+    end
+    
+    local window = Nebula.Windows[1]
+    if window and window.ScreenGui then
+        Nebula.WatermarkInstance = WatermarkModule(Nebula, Theme, Utils, window.ScreenGui)
+        return Nebula.WatermarkInstance:Create(options)
+    end
+end
+
+function Nebula:HideWatermark()
+    if Nebula.WatermarkInstance then
+        Nebula.WatermarkInstance:SetVisible(false)
+    end
+end
+
+function Nebula:ShowWatermark()
+    if Nebula.WatermarkInstance then
+        Nebula.WatermarkInstance:SetVisible(true)
+    end
+end
+
+local function AnimateWindow(mainFrame, open, callback)
+    local TweenService = game:GetService("TweenService")
+    
+    if open then
+        mainFrame.Visible = true
+        mainFrame.Size = UDim2.fromOffset(mainFrame.AbsoluteSize.X, 0)
+        mainFrame.BackgroundTransparency = 1
+        
+        local sizeTween = TweenService:Create(mainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = mainFrame:GetAttribute("OriginalSize") or UDim2.fromOffset(750, 550)
+        })
+        local fadeIn = TweenService:Create(mainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {
+            BackgroundTransparency = Theme.WindowTransparency
+        })
+        
+        sizeTween:Play()
+        fadeIn:Play()
+        
+        sizeTween.Completed:Connect(function()
+            if callback then callback() end
+        end)
+    else
+        local sizeTween = TweenService:Create(mainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+            Size = UDim2.fromOffset(mainFrame.AbsoluteSize.X, 0)
+        })
+        local fadeOut = TweenService:Create(mainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {
+            BackgroundTransparency = 1
+        })
+        
+        sizeTween:Play()
+        fadeOut:Play()
+        
+        sizeTween.Completed:Connect(function()
+            mainFrame.Visible = false
+            if callback then callback() end
+        end)
     end
 end
 
@@ -105,7 +169,9 @@ function Nebula:CreateWindow(options)
     })
     MainFrame.Position = fromOffset(MainFrame.AbsolutePosition.X, MainFrame.AbsolutePosition.Y)
     MainFrame.AnchorPoint = vec2(0, 0)
+    MainFrame:SetAttribute("OriginalSize", windowData.Size)
     windowData.MainFrame = MainFrame
+    windowData.Animating = false
     
     Utils:Create("UICorner", {
         Parent = MainFrame,
@@ -202,8 +268,12 @@ function Nebula:CreateWindow(options)
         Utils:Tween(MinimizeBtn, {BackgroundColor3 = rgb(255, 189, 46)}, 0.1)
     end)
     MinimizeBtn.MouseButton1Click:Connect(function()
+        if windowData.Animating then return end
+        windowData.Animating = true
         Nebula.Opened = false
-        MainFrame.Visible = false
+        AnimateWindow(MainFrame, false, function()
+            windowData.Animating = false
+        end)
     end)
     
     Utils:Create("TextLabel", {
@@ -339,13 +409,30 @@ function Nebula:CreateWindow(options)
     Utils:AddConnection(UserInputService.InputBegan, function(input, gameProcessed)
         if gameProcessed then return end
         if input.KeyCode == Nebula.ToggleKey then
+            if windowData.Animating then return end
+            windowData.Animating = true
             Nebula.Opened = not Nebula.Opened
-            MainFrame.Visible = Nebula.Opened
+            AnimateWindow(MainFrame, Nebula.Opened, function()
+                windowData.Animating = false
+            end)
         end
     end)
     
     insert(Nebula.Windows, windowData)
     setmetatable(windowData, Window)
+    
+    task.spawn(function()
+        local originalSize = windowData.Size
+        MainFrame.Size = fromOffset(originalSize.X.Offset, 0)
+        MainFrame.BackgroundTransparency = 1
+        
+        task.wait(0.05)
+        
+        windowData.Animating = true
+        AnimateWindow(MainFrame, true, function()
+            windowData.Animating = false
+        end)
+    end)
     
     return windowData
 end
