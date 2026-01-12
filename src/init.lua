@@ -68,35 +68,37 @@ local function AnimateWindow(mainFrame, open, callback)
     
     if open then
         mainFrame.Visible = true
-        mainFrame.Size = UDim2.fromOffset(mainFrame.AbsoluteSize.X, 0)
-        mainFrame.BackgroundTransparency = 1
         
-        local sizeTween = TweenService:Create(mainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Size = mainFrame:GetAttribute("OriginalSize") or UDim2.fromOffset(750, 550)
+        local scale = mainFrame:FindFirstChild("UIScale")
+        if not scale then
+            scale = Instance.new("UIScale")
+            scale.Name = "UIScale"
+            scale.Parent = mainFrame
+        end
+        scale.Scale = 0.95
+        
+        local tween = TweenService:Create(scale, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Scale = 1
         })
-        local fadeIn = TweenService:Create(mainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {
-            BackgroundTransparency = Theme.WindowTransparency
-        })
-        
-        sizeTween:Play()
-        fadeIn:Play()
-        
-        sizeTween.Completed:Connect(function()
+        tween:Play()
+        tween.Completed:Connect(function()
             if callback then callback() end
         end)
     else
-        local sizeTween = TweenService:Create(mainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-            Size = UDim2.fromOffset(mainFrame.AbsoluteSize.X, 0)
-        })
-        local fadeOut = TweenService:Create(mainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {
-            BackgroundTransparency = 1
-        })
+        local scale = mainFrame:FindFirstChild("UIScale")
+        if not scale then
+            scale = Instance.new("UIScale")
+            scale.Name = "UIScale"
+            scale.Parent = mainFrame
+        end
         
-        sizeTween:Play()
-        fadeOut:Play()
-        
-        sizeTween.Completed:Connect(function()
+        local tween = TweenService:Create(scale, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+            Scale = 0.95
+        })
+        tween:Play()
+        tween.Completed:Connect(function()
             mainFrame.Visible = false
+            scale.Scale = 1
             if callback then callback() end
         end)
     end
@@ -145,7 +147,6 @@ function Nebula:CreateWindow(options)
     })
     MainFrame.Position = fromOffset(MainFrame.AbsolutePosition.X, MainFrame.AbsolutePosition.Y)
     MainFrame.AnchorPoint = vec2(0, 0)
-    MainFrame:SetAttribute("OriginalSize", windowData.Size)
     windowData.MainFrame = MainFrame
     windowData.Animating = false
     
@@ -398,12 +399,7 @@ function Nebula:CreateWindow(options)
     setmetatable(windowData, Window)
     
     task.spawn(function()
-        local originalSize = windowData.Size
-        MainFrame.Size = fromOffset(originalSize.X.Offset, 0)
-        MainFrame.BackgroundTransparency = 1
-        
         task.wait(0.05)
-        
         windowData.Animating = true
         AnimateWindow(MainFrame, true, function()
             windowData.Animating = false

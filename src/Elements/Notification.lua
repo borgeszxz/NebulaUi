@@ -11,20 +11,24 @@ return function(Nebula, Theme, Utils, ScreenGui)
     
     local NotifTypes = {
         Success = {
-            Icon = "check-circle",
-            Color = rgb(80, 200, 120),
+            Icon = "check",
+            Color = rgb(34, 197, 94),
+            GlowColor = rgb(34, 197, 94),
         },
         Error = {
-            Icon = "x-circle",
-            Color = rgb(255, 95, 87),
+            Icon = "x",
+            Color = rgb(239, 68, 68),
+            GlowColor = rgb(239, 68, 68),
         },
         Warning = {
             Icon = "alert-triangle",
-            Color = rgb(255, 189, 46),
+            Color = rgb(245, 158, 11),
+            GlowColor = rgb(245, 158, 11),
         },
         Info = {
             Icon = "info",
             Color = Theme.Accent,
+            GlowColor = Theme.Accent,
         },
     }
     
@@ -35,14 +39,14 @@ return function(Nebula, Theme, Utils, ScreenGui)
             Name = "NotificationContainer",
             Parent = screenGui,
             BackgroundTransparency = 1,
-            Size = udim2(0, 280, 1, -20),
-            Position = udim2(1, -290, 0, 10),
+            Size = udim2(0, 320, 1, -20),
+            Position = udim2(1, -330, 0, 10),
         })
         
         Utils:Create("UIListLayout", {
             Parent = self.Container,
             SortOrder = Enum.SortOrder.LayoutOrder,
-            Padding = udim(0, 8),
+            Padding = udim(0, 10),
             VerticalAlignment = Enum.VerticalAlignment.Top,
         })
     end
@@ -61,96 +65,210 @@ return function(Nebula, Theme, Utils, ScreenGui)
         local NotifFrame = Utils:Create("Frame", {
             Name = "Notification",
             Parent = self.Container,
-            BackgroundColor3 = rgb(20, 20, 24),
-            Size = fromOffset(280, 0),
+            BackgroundColor3 = rgb(18, 18, 22),
+            BackgroundTransparency = 0.05,
+            Size = fromOffset(320, 0),
             ClipsDescendants = true,
         })
         
         Utils:Create("UICorner", {
             Parent = NotifFrame,
-            CornerRadius = udim(0, 8),
+            CornerRadius = udim(0, 12),
+        })
+        
+        local GlowStroke = Utils:Create("UIStroke", {
+            Parent = NotifFrame,
+            Color = typeData.GlowColor,
+            Transparency = 0.7,
+            Thickness = 1.5,
+        })
+        
+        local TopGradient = Utils:Create("Frame", {
+            Name = "TopGradient",
+            Parent = NotifFrame,
+            BackgroundColor3 = typeData.Color,
+            BackgroundTransparency = 0.85,
+            Size = udim2(1, 0, 0, 40),
+            Position = udim2(0, 0, 0, 0),
+            BorderSizePixel = 0,
+        })
+        
+        Utils:Create("UIGradient", {
+            Parent = TopGradient,
+            Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(1, 1),
+            }),
+            Rotation = 90,
+        })
+        
+        Utils:Create("UICorner", {
+            Parent = TopGradient,
+            CornerRadius = udim(0, 12),
+        })
+        
+        local IconContainer = Utils:Create("Frame", {
+            Name = "IconContainer",
+            Parent = NotifFrame,
+            BackgroundColor3 = typeData.Color,
+            BackgroundTransparency = 0.15,
+            Size = fromOffset(36, 36),
+            Position = fromOffset(14, 14),
+        })
+        
+        Utils:Create("UICorner", {
+            Parent = IconContainer,
+            CornerRadius = udim(0, 10),
         })
         
         Utils:Create("UIStroke", {
-            Parent = NotifFrame,
-            Color = rgb(40, 40, 45),
+            Parent = IconContainer,
+            Color = typeData.Color,
+            Transparency = 0.5,
             Thickness = 1,
         })
         
-        local AccentBar = Utils:Create("Frame", {
+        local IconLabel = Utils:Create("ImageLabel", {
+            Parent = IconContainer,
+            BackgroundTransparency = 1,
+            Size = fromOffset(20, 20),
+            Position = udim2(0.5, 0, 0.5, 0),
+            AnchorPoint = vec2(0.5, 0.5),
+            Image = Nebula:GetIcon(icon),
+            ImageColor3 = rgb(255, 255, 255),
+        })
+        
+        local TitleLabel = Utils:Create("TextLabel", {
+            Name = "Title",
             Parent = NotifFrame,
-            BackgroundColor3 = typeData.Color,
-            Size = udim2(0, 4, 1, -16),
-            Position = udim2(0, 8, 0, 8),
+            BackgroundTransparency = 1,
+            Size = udim2(1, -100, 0, 20),
+            Position = fromOffset(60, 12),
+            Font = Enum.Font.GothamBold,
+            Text = title,
+            TextColor3 = Theme.TextPrimary,
+            TextSize = 14,
+            TextXAlignment = Enum.TextXAlignment.Left,
+        })
+        
+        local MessageLabel = Utils:Create("TextLabel", {
+            Name = "Message",
+            Parent = NotifFrame,
+            BackgroundTransparency = 1,
+            Size = udim2(1, -100, 0, 18),
+            Position = fromOffset(60, 34),
+            Font = Enum.Font.Gotham,
+            Text = message,
+            TextColor3 = Theme.TextSecondary,
+            TextSize = 12,
+            TextXAlignment = Enum.TextXAlignment.Left,
+        })
+        
+        local CloseBtn = Utils:Create("TextButton", {
+            Name = "Close",
+            Parent = NotifFrame,
+            BackgroundTransparency = 1,
+            Size = fromOffset(24, 24),
+            Position = udim2(1, -32, 0, 12),
+            Text = "",
+            AutoButtonColor = false,
+        })
+        
+        local CloseIcon = Utils:Create("ImageLabel", {
+            Parent = CloseBtn,
+            BackgroundTransparency = 1,
+            Size = fromOffset(14, 14),
+            Position = udim2(0.5, 0, 0.5, 0),
+            AnchorPoint = vec2(0.5, 0.5),
+            Image = Nebula:GetIcon("x"),
+            ImageColor3 = Theme.TextMuted,
+        })
+        
+        local ProgressContainer = Utils:Create("Frame", {
+            Name = "ProgressContainer",
+            Parent = NotifFrame,
+            BackgroundColor3 = rgb(30, 30, 35),
+            Size = udim2(1, -28, 0, 4),
+            Position = udim2(0, 14, 1, -12),
             BorderSizePixel = 0,
         })
         
         Utils:Create("UICorner", {
-            Parent = AccentBar,
+            Parent = ProgressContainer,
             CornerRadius = udim(0, 2),
         })
         
-        local IconLabel = Utils:Create("ImageLabel", {
-            Parent = NotifFrame,
-            BackgroundTransparency = 1,
-            Size = fromOffset(20, 20),
-            Position = fromOffset(22, 12),
-            Image = Nebula:GetIcon(icon),
-            ImageColor3 = typeData.Color,
-        })
-        
-        Utils:Create("TextLabel", {
-            Parent = NotifFrame,
-            BackgroundTransparency = 1,
-            Size = udim2(1, -60, 0, 18),
-            Position = fromOffset(50, 10),
-            Font = Enum.Font.GothamBold,
-            Text = title,
-            TextColor3 = Theme.TextPrimary,
-            TextSize = 13,
-            TextXAlignment = Enum.TextXAlignment.Left,
-        })
-        
-        Utils:Create("TextLabel", {
-            Parent = NotifFrame,
-            BackgroundTransparency = 1,
-            Size = udim2(1, -60, 0, 16),
-            Position = fromOffset(50, 30),
-            Font = Enum.Font.Gotham,
-            Text = message,
-            TextColor3 = Theme.TextSecondary,
-            TextSize = 11,
-            TextXAlignment = Enum.TextXAlignment.Left,
-        })
-        
         local ProgressBar = Utils:Create("Frame", {
-            Parent = NotifFrame,
+            Name = "Progress",
+            Parent = ProgressContainer,
             BackgroundColor3 = typeData.Color,
-            Size = udim2(1, 0, 0, 2),
-            Position = udim2(0, 0, 1, -2),
+            Size = udim2(1, 0, 1, 0),
             BorderSizePixel = 0,
         })
         
-        local openTween = TweenService:Create(NotifFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-            Size = fromOffset(280, 54)
+        Utils:Create("UICorner", {
+            Parent = ProgressBar,
+            CornerRadius = udim(0, 2),
+        })
+        
+        Utils:Create("UIGradient", {
+            Parent = ProgressBar,
+            Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, typeData.Color),
+                ColorSequenceKeypoint.new(1, Color3.new(
+                    math.min(typeData.Color.R * 1.3, 1),
+                    math.min(typeData.Color.G * 1.3, 1),
+                    math.min(typeData.Color.B * 1.3, 1)
+                )),
+            }),
+        })
+        
+        NotifFrame.Position = udim2(1, 50, 0, 0)
+        
+        local openTween = TweenService:Create(NotifFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = fromOffset(320, 70),
+            Position = udim2(0, 0, 0, 0)
         })
         openTween:Play()
         
+        TweenService:Create(GlowStroke, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {
+            Transparency = 0.4
+        }):Play()
+        
         local progressTween = TweenService:Create(ProgressBar, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
-            Size = udim2(0, 0, 0, 2)
+            Size = udim2(0, 0, 1, 0)
         })
         
-        task.delay(0.25, function()
+        task.delay(0.4, function()
             progressTween:Play()
         end)
         
-        task.delay(duration + 0.25, function()
-            local closeTween = TweenService:Create(NotifFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
-                Size = fromOffset(280, 0)
+        CloseBtn.MouseEnter:Connect(function()
+            TweenService:Create(CloseIcon, TweenInfo.new(0.15), {ImageColor3 = Theme.TextPrimary}):Play()
+        end)
+        
+        CloseBtn.MouseLeave:Connect(function()
+            TweenService:Create(CloseIcon, TweenInfo.new(0.15), {ImageColor3 = Theme.TextMuted}):Play()
+        end)
+        
+        local function CloseNotification()
+            progressTween:Cancel()
+            TweenService:Create(GlowStroke, TweenInfo.new(0.15), {Transparency = 1}):Play()
+            local closeTween = TweenService:Create(NotifFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+                Position = udim2(1, 50, 0, 0),
+                Size = fromOffset(320, 0)
             })
             closeTween:Play()
             closeTween.Completed:Wait()
             NotifFrame:Destroy()
+        end
+        
+        CloseBtn.MouseButton1Click:Connect(CloseNotification)
+        
+        task.delay(duration + 0.4, function()
+            if NotifFrame and NotifFrame.Parent then
+                CloseNotification()
+            end
         end)
         
         return NotifFrame
