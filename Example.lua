@@ -168,6 +168,25 @@ ChamsSection:Slider({
     end,
 })
 
+ChamsSection:ColorPicker({
+    Name = "Chams Color",
+    Default = Color3.fromRGB(155, 135, 245),
+    Flag = "ChamsColor",
+    Callback = function(color)
+        print("Chams Color:", color)
+    end,
+})
+
+ESPSection:MultiDropdown({
+    Name = "Show Parts",
+    Options = {"Box", "Name", "Health", "Distance", "Tracers"},
+    Default = {"Box", "Name"},
+    Flag = "ESPParts",
+    Callback = function(selected)
+        print("ESP Parts:", table.concat(selected, ", "))
+    end,
+})
+
 local MiscTab = Window:NewTab({
     Name = "Misc",
     Icon = "puzzle",

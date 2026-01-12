@@ -31,6 +31,8 @@ local KeybindElement = LoadModule("Elements/Keybind.lua")
 local DropdownElement = LoadModule("Elements/Dropdown.lua")
 local TextBoxElement = LoadModule("Elements/TextBox.lua")
 local NotificationModule = LoadModule("Elements/Notification.lua")
+local ColorPickerElement = LoadModule("Elements/ColorPicker.lua")
+local MultiDropdownElement = LoadModule("Elements/MultiDropdown.lua")
 
 local rgb = Color3.fromRGB
 local udim2 = UDim2.new
@@ -715,6 +717,14 @@ end
 
 function Section:TextBox(options)
     return TextBoxElement(Nebula, Theme, Utils, self, options)
+end
+
+function Section:ColorPicker(options)
+    return ColorPickerElement(Nebula, Theme, Utils, self, options)
+end
+
+function Section:MultiDropdown(options)
+    return MultiDropdownElement(Nebula, Theme, Utils, self, options)
 end
 
 return Nebula
