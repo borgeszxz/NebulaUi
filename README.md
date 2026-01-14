@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-1.0-purple)
+![Version](https://img.shields.io/badge/version-2.0.0-purple)
 ![Roblox](https://img.shields.io/badge/platform-Roblox-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -17,22 +17,17 @@
 
 ---
 
-## 📸 Preview
-
-<div align="center">
-
-![Nebula UI Preview](https://media.discordapp.net/attachments/1097281959538991235/1459925010796908575/image.png?ex=69650c9e&is=6963bb1e&hm=ed89ef8807a3b86bf1cc2417425e27f3ffb57861875ea56eb1743794175d0c45&=&format=webp&quality=lossless)
-
-</div>
-
----
-
 ## ✨ Features
 
 - 🎨 **Minimalist Design**
 - 📦 **Modular Architecture** 
 - 🎯 **Lucide Icons**
 - ⚡ **Smooth Animations**
+- 🖼️ **Permashow / Keybind List**
+- 🔄 **Toggle/Hold/Always Modes**
+- 📝 **Notifications System**
+- 🎨 **Color Picker**
+- 🛡️ **Confirmation Modals**
 
 ---
 
@@ -82,22 +77,28 @@ Section:Toggle({
 ### Toggle
 ```lua
 Section:Toggle({
-    Name = "Toggle Name",
+    Name = "Enable Feature",
+    Description = "Feature description",
     Default = false,
-    Flag = "ToggleFlag",
-    Callback = function(value) end
+    Flag = "FeatureEnabled",
+    Permashow = true,        -- Add to keybind list automatically
+    Key = "E",               -- Default keybind
+    Mode = "Toggle",         -- Toggle, Hold, Always
+    Callback = function(value) 
+        print("Feature:", value)
+    end
 })
 ```
 
 ### Slider
 ```lua
 Section:Slider({
-    Name = "Slider Name",
-    Min = 0,
-    Max = 100,
-    Default = 50,
+    Name = "Walk Speed",
+    Min = 16,
+    Max = 200,
+    Default = 16,
     Increment = 1,
-    Flag = "SliderFlag",
+    Flag = "WalkSpeed",
     Callback = function(value) end
 })
 ```
@@ -105,39 +106,69 @@ Section:Slider({
 ### Button
 ```lua
 Section:Button({
-    Name = "Button Name",
-    Callback = function() end
+    Name = "Click Me",
+    Callback = function() 
+        print("Clicked!")
+    end
 })
 ```
 
 ### Dropdown
 ```lua
 Section:Dropdown({
-    Name = "Dropdown Name",
-    Options = {"Option 1", "Option 2", "Option 3"},
-    Default = "Option 1",
-    Flag = "DropdownFlag",
+    Name = "Select Mode",
+    Options = {"Legit", "Rage", "HvH"},
+    Default = "Legit",
+    Flag = "ModeSelector",
     Callback = function(value) end
+})
+```
+
+### MultiDropdown
+```lua
+Section:MultiDropdown({
+    Name = "ESP Filters",
+    Options = {"Players", "Items", "Tracers"},
+    Default = {"Players"},
+    Flag = "ESPFilters",
+    Callback = function(table) 
+        print(table.concat(table, ", "))
+    end
+})
+```
+
+### ColorPicker
+```lua
+Section:ColorPicker({
+    Name = "Accent Color",
+    Default = Color3.fromRGB(155, 135, 245),
+    Flag = "AccentColor",
+    Callback = function(color) end
 })
 ```
 
 ### Keybind
 ```lua
-Section:Keybind({
-    Name = "Keybind Name",
+local Keybind = Section:Keybind({
+    Name = "Aim Key",
     Default = Enum.KeyCode.E,
-    Flag = "KeybindFlag",
-    Callback = function(key) end
+    Mode = "Hold",       -- Toggle, Hold, Always
+    ShowMode = true,     -- Show mode toggle button
+    Flag = "AimKey",
+    Callback = function(key, active) end
 })
+
+-- Link to a toggle to sync modes (Toggle/Hold/Always)
+Keybind:SetLinkedToggle(ToggleObject)
 ```
 
 ### TextBox
 ```lua
 Section:TextBox({
-    Name = "TextBox Name",
+    Name = "Player Name",
     Placeholder = "Enter text...",
     Default = "",
-    Flag = "TextBoxFlag",
+    Flag = "TargetPlayer",
     Callback = function(text, enterPressed) end
 })
 ```
@@ -145,7 +176,55 @@ Section:TextBox({
 ### Label
 ```lua
 Section:Label({
-    Text = "Some text here"
+    Text = "Feature Settings"
+})
+```
+
+---
+
+## 🖼️ Permashow (Keybind List)
+
+The Permashow system displays active features on screen.
+
+```lua
+-- Add manually (not recommended, use Toggle Permashow=true instead)
+Nebula:AddPermashow({
+    Name = "Fly",
+    Mode = "Toggle",
+    Key = "F"
+})
+
+-- Toggle Visibility
+Nebula:TogglePermashow(true) -- Show/Hide list
+```
+
+---
+
+## 📝 Notifications
+
+```lua
+Nebula:Notify({
+    Title = "Success",
+    Message = "Config loaded successfully!",
+    Type = "Success", -- Success, Info, Warning, Error
+    Duration = 5
+})
+```
+
+---
+
+## 🛡️ Dialogs
+
+```lua
+Nebula:Confirm({
+    Title = "Confirmation",
+    Content = "Are you sure you want to exit?",
+    ConfirmText = "Yes",
+    CancelText = "No",
+    OnConfirm = function()
+        Nebula:Unload()
+    end,
+    OnCancel = function() end
 })
 ```
 
@@ -160,48 +239,9 @@ Window:NewTab({
     Name = "Combat",
     Icon = "sword"
 })
-
-Window:NewTab({
-    Name = "Visuals", 
-    Icon = "eye"
-})
-
-Window:NewTab({
-    Name = "Settings",
-    Icon = "settings"
-})
-```
-
-**Other icon packs:**
-```lua
-Icon = "geist:folder"    -- Geist Icons
-Icon = "solar:home"      -- Solar Icons
-Icon = "craft:settings"  -- Craft Icons
 ```
 
 ---
-
-## 📁 Project Structure
-
-```
-NebulaUi/
-├── Loader.lua          # Entry point
-├── Example.lua         # Demo script
-└── src/
-    ├── init.lua        # Main library
-    ├── Core/
-    │   ├── Theme.lua   # Colors & styling
-    │   ├── Utils.lua   # Helper functions
-    │   └── Icons.lua   # Lucide icons
-    └── Elements/
-        ├── Toggle.lua
-        ├── Slider.lua
-        ├── Button.lua
-        ├── Label.lua
-        ├── Keybind.lua
-        ├── Dropdown.lua
-        └── TextBox.lua
-```
 
 ## ⚙️ API
 
@@ -215,5 +255,3 @@ Nebula:SetIconPack("lucide")  -- lucide, geist, solar, craft
 -- Unload UI
 Nebula:Unload()
 ```
-
----

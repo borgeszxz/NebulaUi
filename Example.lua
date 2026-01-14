@@ -7,7 +7,7 @@ local Nebula = loadstring(initCode)()
 
 local Window = Nebula:CreateWindow({
     Title = "Nebula UI",
-    Subtitle = "V1",
+    Subtitle = "V2.0.0",
     Size = UDim2.fromOffset(750, 550),
     ToggleKey = Enum.KeyCode.LeftControl,
 })
