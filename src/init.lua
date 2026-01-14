@@ -31,6 +31,7 @@ local KeybindElement = LoadModule("Elements/Keybind.lua")
 local DropdownElement = LoadModule("Elements/Dropdown.lua")
 local TextBoxElement = LoadModule("Elements/TextBox.lua")
 local NotificationModule = LoadModule("Elements/Notification.lua")
+local PermashowModule = LoadModule("Elements/Permashow.lua")
 local ColorPickerElement = LoadModule("Elements/ColorPicker.lua")
 local MultiDropdownElement = LoadModule("Elements/MultiDropdown.lua")
 local DialogModule = LoadModule("Components/Dialog.lua")
@@ -70,6 +71,24 @@ end
 function Nebula:Dialog(options)
     if Nebula.DialogSystem then
         return Nebula.DialogSystem:Create(options)
+    end
+end
+
+function Nebula:AddPermashow(options)
+    if Nebula.PermashowSystem then
+        return Nebula.PermashowSystem:Add(options)
+    end
+end
+
+function Nebula:RemovePermashow(name)
+    if Nebula.PermashowSystem then
+        return Nebula.PermashowSystem:Remove(name)
+    end
+end
+
+function Nebula:TogglePermashow(visible)
+    if Nebula.PermashowSystem then
+        return Nebula.PermashowSystem:Toggle(visible)
     end
 end
 
@@ -164,6 +183,11 @@ function Nebula:CreateWindow(options)
     if not Nebula.Tooltip then
         Nebula.Tooltip = TooltipModule(Nebula, Theme, Utils, ScreenGui)
         Nebula.Tooltip:Init()
+    end
+    
+    if not Nebula.PermashowSystem then
+        Nebula.PermashowSystem = PermashowModule(Nebula, Theme, Utils, ScreenGui)
+        Nebula.PermashowSystem:Init(ScreenGui)
     end
     
     local MainFrame = Utils:Create("Frame", {
@@ -266,7 +290,191 @@ function Nebula:CreateWindow(options)
         Utils:Tween(CloseBtn, {BackgroundColor3 = rgb(255, 95, 87)}, 0.1)
     end)
     CloseBtn.MouseButton1Click:Connect(function()
-        Nebula:Unload()
+        if windowData.ConfirmOpen then return end
+        windowData.ConfirmOpen = true
+        
+        local Overlay = Utils:Create("Frame", {
+            Name = "ConfirmOverlay",
+            Parent = ScreenGui,
+            BackgroundColor3 = rgb(0, 0, 0),
+            BackgroundTransparency = 1,
+            Size = udim2(1, 0, 1, 0),
+            ZIndex = 100,
+        })
+        
+        local ConfirmBox = Utils:Create("Frame", {
+            Name = "ConfirmBox",
+            Parent = Overlay,
+            BackgroundColor3 = rgb(16, 16, 20),
+            Size = fromOffset(320, 0),
+            Position = fromScale(0.5, 0.5),
+            AnchorPoint = vec2(0.5, 0.5),
+            ClipsDescendants = true,
+            ZIndex = 101,
+        })
+        
+        Utils:Create("UICorner", {
+            Parent = ConfirmBox,
+            CornerRadius = udim(0, 12),
+        })
+        
+        Utils:Create("UIStroke", {
+            Parent = ConfirmBox,
+            Color = rgb(255, 95, 87),
+            Transparency = 0.7,
+            Thickness = 1.5,
+        })
+        
+        local IconContainer = Utils:Create("Frame", {
+            Parent = ConfirmBox,
+            BackgroundColor3 = rgb(255, 95, 87),
+            BackgroundTransparency = 0.85,
+            Size = fromOffset(56, 56),
+            Position = udim2(0.5, -28, 0, 24),
+            ZIndex = 102,
+        })
+        Utils:Create("UICorner", {
+            Parent = IconContainer,
+            CornerRadius = udim(1, 0),
+        })
+        
+        local IconLabel = Utils:Create("ImageLabel", {
+            Parent = IconContainer,
+            BackgroundTransparency = 1,
+            Size = fromOffset(28, 28),
+            Position = fromScale(0.5, 0.5),
+            AnchorPoint = vec2(0.5, 0.5),
+            Image = Nebula:GetIcon("log-out"),
+            ImageColor3 = rgb(255, 95, 87),
+            ZIndex = 103,
+        })
+        
+        local TitleLabel = Utils:Create("TextLabel", {
+            Parent = ConfirmBox,
+            BackgroundTransparency = 1,
+            Size = udim2(1, -40, 0, 24),
+            Position = udim2(0.5, 0, 0, 90),
+            AnchorPoint = vec2(0.5, 0),
+            Font = Enum.Font.GothamBold,
+            Text = "Close Menu?",
+            TextColor3 = Theme.TextPrimary,
+            TextSize = 18,
+            TextXAlignment = Enum.TextXAlignment.Center,
+            ZIndex = 102,
+        })
+        
+        local DescLabel = Utils:Create("TextLabel", {
+            Parent = ConfirmBox,
+            BackgroundTransparency = 1,
+            Size = udim2(1, -40, 0, 36),
+            Position = udim2(0.5, 0, 0, 118),
+            AnchorPoint = vec2(0.5, 0),
+            Font = Enum.Font.Gotham,
+            Text = "This will unload the script.\nYou'll need to re-execute to use it again.",
+            TextColor3 = Theme.TextMuted,
+            TextSize = 12,
+            TextXAlignment = Enum.TextXAlignment.Center,
+            TextWrapped = true,
+            ZIndex = 102,
+        })
+        
+        local ButtonsFrame = Utils:Create("Frame", {
+            Parent = ConfirmBox,
+            BackgroundTransparency = 1,
+            Size = udim2(1, -40, 0, 40),
+            Position = udim2(0.5, 0, 0, 168),
+            AnchorPoint = vec2(0.5, 0),
+            ZIndex = 102,
+        })
+        
+        Utils:Create("UIListLayout", {
+            Parent = ButtonsFrame,
+            FillDirection = Enum.FillDirection.Horizontal,
+            HorizontalAlignment = Enum.HorizontalAlignment.Center,
+            Padding = udim(0, 12),
+        })
+        
+        local CancelBtn = Utils:Create("TextButton", {
+            Parent = ButtonsFrame,
+            BackgroundColor3 = rgb(30, 30, 35),
+            Size = fromOffset(120, 40),
+            Font = Enum.Font.GothamMedium,
+            Text = "Cancel",
+            TextColor3 = Theme.TextSecondary,
+            TextSize = 14,
+            AutoButtonColor = false,
+            ZIndex = 103,
+        })
+        Utils:Create("UICorner", {
+            Parent = CancelBtn,
+            CornerRadius = udim(0, 8),
+        })
+        Utils:Create("UIStroke", {
+            Parent = CancelBtn,
+            Color = rgb(50, 50, 55),
+            Thickness = 1,
+        })
+        
+        local ConfirmBtn = Utils:Create("TextButton", {
+            Parent = ButtonsFrame,
+            BackgroundColor3 = rgb(220, 70, 60),
+            Size = fromOffset(120, 40),
+            Font = Enum.Font.GothamBold,
+            Text = "Confirm",
+            TextColor3 = rgb(255, 255, 255),
+            TextSize = 14,
+            AutoButtonColor = false,
+            ZIndex = 103,
+        })
+        Utils:Create("UICorner", {
+            Parent = ConfirmBtn,
+            CornerRadius = udim(0, 8),
+        })
+        
+        Utils:Tween(Overlay, {BackgroundTransparency = 0.6}, 0.25)
+        Utils:Tween(ConfirmBox, {Size = fromOffset(320, 230)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+        
+        local function closeModal()
+            Utils:Tween(Overlay, {BackgroundTransparency = 1}, 0.2)
+            Utils:Tween(ConfirmBox, {Size = fromOffset(320, 0)}, 0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.In)
+            task.delay(0.25, function()
+                Overlay:Destroy()
+                windowData.ConfirmOpen = false
+            end)
+        end
+        
+        CancelBtn.MouseEnter:Connect(function()
+            Utils:Tween(CancelBtn, {BackgroundColor3 = rgb(40, 40, 45)}, 0.15)
+        end)
+        CancelBtn.MouseLeave:Connect(function()
+            Utils:Tween(CancelBtn, {BackgroundColor3 = rgb(30, 30, 35)}, 0.15)
+        end)
+        CancelBtn.MouseButton1Click:Connect(closeModal)
+        
+        ConfirmBtn.MouseEnter:Connect(function()
+            Utils:Tween(ConfirmBtn, {BackgroundColor3 = rgb(200, 55, 45)}, 0.15)
+        end)
+        ConfirmBtn.MouseLeave:Connect(function()
+            Utils:Tween(ConfirmBtn, {BackgroundColor3 = rgb(220, 70, 60)}, 0.15)
+        end)
+        ConfirmBtn.MouseButton1Click:Connect(function()
+            closeModal()
+            task.delay(0.25, function()
+                Nebula:Unload()
+            end)
+        end)
+        
+        Overlay.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                local pos = input.Position
+                local boxPos = ConfirmBox.AbsolutePosition
+                local boxSize = ConfirmBox.AbsoluteSize
+                if pos.X < boxPos.X or pos.X > boxPos.X + boxSize.X or 
+                   pos.Y < boxPos.Y or pos.Y > boxPos.Y + boxSize.Y then
+                    closeModal()
+                end
+            end
+        end)
     end)
     
     MinimizeBtn.MouseEnter:Connect(function()

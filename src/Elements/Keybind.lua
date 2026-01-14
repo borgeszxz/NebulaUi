@@ -183,9 +183,21 @@ return function(Nebula, Theme, Utils, Section, options)
             if keybindData.Mode ~= "Always" then
                 keybindData.Active = false
                 Nebula.Flags[keybindData.Flag .. "_Active"] = false
+            else
+                keybindData.Active = true
+                Nebula.Flags[keybindData.Flag .. "_Active"] = true
             end
             
             UpdateModeVisual()
+            
+            if keybindData.LinkedToggleObject then
+                keybindData.LinkedToggleObject.SetMode(keybindData.Mode)
+                if keybindData.Mode == "Always" then
+                    keybindData.LinkedToggleObject.SetValue(true)
+                end
+            elseif keybindData.LinkedToggle and Nebula.PermashowSystem then
+                Nebula.PermashowSystem:Update(keybindData.LinkedToggle, {Mode = keybindData.Mode})
+            end
             
             Nebula:Notify({
                 Title = "Mode Changed",
@@ -272,6 +284,16 @@ return function(Nebula, Theme, Utils, Section, options)
     
     function keybindData:IsActive()
         return keybindData.Active
+    end
+    
+    function keybindData:SetLinkedToggle(toggle)
+        if type(toggle) == "string" then
+            keybindData.LinkedToggle = toggle
+            keybindData.LinkedToggleObject = nil
+        else
+            keybindData.LinkedToggle = toggle.Name
+            keybindData.LinkedToggleObject = toggle
+        end
     end
     
     UpdateModeVisual()

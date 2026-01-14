@@ -9,6 +9,9 @@ return function(Nebula, Theme, Utils, Section, options)
         Flag = options.Flag or options.Name or "Toggle",
         Callback = options.Callback or function() end,
         Value = options.Default or false,
+        Permashow = options.Permashow or false,
+        PermashowKey = options.Key or nil,
+        PermashowMode = options.Mode or "Toggle",
     }
     
     Nebula.Flags[toggleData.Flag] = toggleData.Value
@@ -111,10 +114,22 @@ return function(Nebula, Theme, Utils, Section, options)
             Utils:Tween(ToggleButton, {BackgroundColor3 = Theme.Accent})
             Utils:Tween(ToggleCircle, {Position = fromOffset(21, 3), BackgroundColor3 = Theme.TextPrimary})
             Utils:Tween(ToggleName, {TextColor3 = Theme.TextPrimary})
+            
+            if toggleData.Permashow and Nebula.PermashowSystem then
+                Nebula:AddPermashow({
+                    Name = toggleData.Name,
+                    Mode = toggleData.PermashowMode,
+                    Key = toggleData.PermashowKey,
+                })
+            end
         else
             Utils:Tween(ToggleButton, {BackgroundColor3 = Theme.ToggleOff})
             Utils:Tween(ToggleCircle, {Position = fromOffset(3, 3), BackgroundColor3 = Theme.ToggleOffCircle})
             Utils:Tween(ToggleName, {TextColor3 = Theme.TextSecondary})
+            
+            if toggleData.Permashow and Nebula.PermashowSystem then
+                Nebula:RemovePermashow(toggleData.Name)
+            end
         end
         
         if not skipCallback then
@@ -131,5 +146,18 @@ return function(Nebula, Theme, Utils, Section, options)
     end
     
     toggleData.SetValue = SetValue
+    toggleData.SetKey = function(key)
+        toggleData.PermashowKey = key
+        if toggleData.Value and toggleData.Permashow and Nebula.PermashowSystem then
+            Nebula.PermashowSystem:Update(toggleData.Name, {Key = key})
+        end
+    end
+    toggleData.SetMode = function(mode)
+        toggleData.PermashowMode = mode
+        if toggleData.Value and toggleData.Permashow and Nebula.PermashowSystem then
+            Nebula.PermashowSystem:Update(toggleData.Name, {Mode = mode})
+        end
+    end
+    
     return toggleData
 end

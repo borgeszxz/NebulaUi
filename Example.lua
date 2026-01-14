@@ -22,12 +22,15 @@ local AimbotSection = CombatTab:NewSection({
     Side = "Left",
 })
 
-AimbotSection:Toggle({
+local AimbotToggle = AimbotSection:Toggle({
     Name = "Enable Aimbot",
     Description = "Automatically aims at the nearest target within your FOV",
     DescriptionDuration = 3,
     Default = false,
     Flag = "AimbotEnabled",
+    Permashow = true,
+    Key = "Q",
+    Mode = "Hold",
     Callback = function(value)
         print("Aimbot:", value)
     end,
@@ -57,16 +60,23 @@ AimbotSection:Dropdown({
     end,
 })
 
-AimbotSection:Keybind({
+local AimbotKeybind = AimbotSection:Keybind({
     Name = "Aim Key",
     Description = "Press this key to activate aimbot. Hold mode keeps it active while held",
     Default = Enum.KeyCode.Q,
     Mode = "Hold",
+    ShowMode = true,
     Flag = "AimbotKey",
     Callback = function(key, active)
-        print("Aim key:", key, "Active:", active)
+        if active then
+            AimbotToggle.SetValue(true)
+        else
+            AimbotToggle.SetValue(false)
+        end
     end,
 })
+
+AimbotKeybind:SetLinkedToggle(AimbotToggle)
 
 local TriggerbotSection = CombatTab:NewSection({
     Name = "Triggerbot",
@@ -241,6 +251,32 @@ PlayerSection:Toggle({
     end,
 })
 
+local AutoFarmToggle = PlayerSection:Toggle({
+    Name = "Auto Farm",
+    Default = false,
+    Flag = "AutoFarm",
+    Permashow = true,
+    Key = "F",
+    Mode = "Toggle",
+    Callback = function(value)
+        print("Auto Farm:", value)
+    end,
+})
+
+local AutoFarmKeybind = PlayerSection:Keybind({
+    Name = "Auto Farm Key",
+    Default = Enum.KeyCode.F,
+    Flag = "AutoFarmKey",
+    ShowMode = true,
+    Mode = "Toggle",
+    Callback = function(key)
+        AutoFarmToggle.SetKey(key.Name)
+        AutoFarmToggle.SetValue(not AutoFarmToggle.Value)
+    end,
+})
+
+AutoFarmKeybind:SetLinkedToggle(AutoFarmToggle)
+
 local UtilitySection = MiscTab:NewSection({
     Name = "Utility",
     Side = "Right",
@@ -299,6 +335,15 @@ UISection:Button({
     Name = "Unload Script",
     Callback = function()
         Nebula:Unload()
+    end,
+})
+
+UISection:Toggle({
+    Name = "Show Keybind List",
+    Default = true,
+    Flag = "ShowPermashow",
+    Callback = function(value)
+        Nebula:TogglePermashow(value)
     end,
 })
 
